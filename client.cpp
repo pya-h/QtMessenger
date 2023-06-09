@@ -53,6 +53,8 @@ void Client::loginCallback(QNetworkReply *response) {
                     authForm->close();
                     currentForm->show();
                 }
+            } else {
+                currentForm->popup("Logged in Already", "It seems that you\'ve already logged in... Please first press logout and then Log in again!");
             }
         } else {
             authForm->popup("Login Unsuccessful", resultText, MessageTypes::Error);
@@ -141,7 +143,7 @@ void Client::sendMessage(QString message) {
     QNetworkAccessManager *restclient;
     restclient = new QNetworkAccessManager(this);
     connect(restclient, &QNetworkAccessManager::finished,
-                    this, &Client::signupCallback);
+                    this, &Client::sendMessageCallback);
 
     restclient->get(request);
 }
@@ -149,14 +151,18 @@ void Client::sendMessage(QString message) {
 void Client::sendMessageCallback(QNetworkReply *response) {
     QJsonObject jsonObject = Client::GetJsonObject(response);
     QString resultText = Client::CheckResponse(jsonObject);
-
-    int code = jsonObject.value("code").toString().toInt();
-    if(code == 200) {
-        ChatForm *chatForm = (ChatForm *) currentForm;
-        QString chatList = chatForm->ui->txtChatList->toPlainText();
-        chatForm->ui->txtChatList->setPlainText(chatList + "\n" + me->getRecentMessageSigned());
-        chatForm->addNewContact(target);
-    } else {
-        currentForm->popup("Message Send Failure", resultText, MessageTypes::Error);
+    try {
+        int code = jsonObject.value("code").toString().toInt();
+        if(code == 200) {
+            ChatForm *chatForm = (ChatForm *) currentForm;
+            QString chatList = chatForm->ui->txtChatList->toPlainText();
+            chatForm->ui->txtChatList->setPlainText(chatList + "\n" + me->getRecentMessageSigned());
+            chatForm->addNewContact(target);
+        } else {
+            currentForm->popup("Message Send Failure", resultText, MessageTypes::Error);
+        }
+    }
+    catch (QException ex) {
+        qDebug() << ex.what();
     }
 }

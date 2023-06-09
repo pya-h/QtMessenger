@@ -42,7 +42,9 @@ bool ChatForm::contactListContains(Contact *contact) {
 
 void ChatForm::addNewContact(Contact *contact) {
     if(!contactListContains(contact)) {
-        QAbstractItemModel *model = ui->lstContacts->model();
-
+        /*QAbstractItemModel *model = ui->lstContacts->model();
+        QModelIndex index = model->index(model->rowCount()-1, 0);
+        model->setData(index, contact->toString());
+        ui->lstContacts->setModel(model);*/
     }
 }
