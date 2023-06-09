@@ -46,10 +46,13 @@ void Client::loginCallback(QNetworkReply *response) {
 
             if(!newToken.isNull()) {
                 this->setToken(newToken.toString());
-                authForm->popup("Login Successfull", "You\'ve logged in successfully...Now you can start chatting :)!");
-                currentForm = new ChatForm(this);
-                authForm->close();
-                currentForm->show();
+                this->me = new class User(this->username, this->password);
+                if(!this->token.isEmpty()) {
+                    authForm->popup("Login Successfull", "You\'ve logged in successfully...Now you can start chatting :)!");
+                    currentForm = new ChatForm(this);
+                    authForm->close();
+                    currentForm->show();
+                }
             }
         } else {
             authForm->popup("Login Unsuccessful", resultText, MessageTypes::Error);
@@ -120,5 +123,40 @@ void Client::signupCallback(QNetworkReply *response) {
    if(currentForm != nullptr && currentForm->type() == Authentication) {
         AuthenticationForm *authForm = (AuthenticationForm *) currentForm;
         authForm->ui->lblResult->setText(resultText);
+    }
+}
+
+void Client::setTarget(Contact *nextTarget) {
+    this->target = nextTarget;
+}
+
+void Client::sendMessage(QString message) {
+    // set query
+    QUrlQuery query = tokenBasedQuery();
+    me->setRecentMessage(message);
+    query.addQueryItem("dst", target->getName());
+    query.addQueryItem("body", message);
+
+    QNetworkRequest request = PrepareRequest("/sendmessage" + target->strType(), query);
+    QNetworkAccessManager *restclient;
+    restclient = new QNetworkAccessManager(this);
+    connect(restclient, &QNetworkAccessManager::finished,
+                    this, &Client::signupCallback);
+
+    restclient->get(request);
+}
+
+void Client::sendMessageCallback(QNetworkReply *response) {
+    QJsonObject jsonObject = Client::GetJsonObject(response);
+    QString resultText = Client::CheckResponse(jsonObject);
+
+    int code = jsonObject.value("code").toString().toInt();
+    if(code == 200) {
+        ChatForm *chatForm = (ChatForm *) currentForm;
+        QString chatList = chatForm->ui->txtChatList->toPlainText();
+        chatForm->ui->txtChatList->setPlainText(chatList + "\n" + me->getRecentMessageSigned());
+        chatForm->addNewContact(target);
+    } else {
+        currentForm->popup("Message Send Failure", resultText, MessageTypes::Error);
     }
 }

@@ -16,7 +16,7 @@ public:
     explicit AuthenticationForm(QObject *client, Form *parent = nullptr);
     ~AuthenticationForm();
 
-    Forms type() {
+    Forms type() override {
         return Authentication;
     }
     Ui::AuthenticationForm *ui;

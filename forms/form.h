@@ -11,7 +11,7 @@ class Form;
 typedef enum {
     Authentication,
     Chat,
-    None
+    Base
 } Forms;
 
 typedef enum {
@@ -29,7 +29,7 @@ public:
     explicit Form(QObject *client, QWidget *parent = nullptr);
     ~Form();
 
-    virtual Forms type() { return None; }
+    virtual Forms type() { return Base; }
 
     bool popup(QString title, QString text, MessageTypes messageType = Information);
    // void* getUI();

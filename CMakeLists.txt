@@ -29,9 +29,14 @@ set(PROJECT_SOURCES
         client.cpp
         serverinterface.cpp
         serverinterface.h
+
+        chat/contact.h
+        chat/contact.cpp
+        chat/user.cpp
+        chat/user.h
 )
 
-set(INCLUDE_DIRS windows)
+set(INCLUDE_DIRS windows chat)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Messenger

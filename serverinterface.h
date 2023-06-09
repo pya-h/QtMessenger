@@ -28,6 +28,7 @@ public:
     static QJsonObject GetJsonObject(QNetworkReply *response);
     static QString CheckResponse(QJsonObject responseObject);
     static QNetworkRequest PrepareRequest(QString path, QUrlQuery query);
+    QUrlQuery tokenBasedQuery();
 signals:
 
 };

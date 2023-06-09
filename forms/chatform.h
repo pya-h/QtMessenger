@@ -3,6 +3,7 @@
 
 #include "form.h"
 #include "ui_chatform.h"
+#include "../chat/contact.h"
 
 namespace Ui {
 class ChatForm;
@@ -16,11 +17,17 @@ public:
     explicit ChatForm(QObject *client, Form *parent = nullptr);
     ~ChatForm();
 
-    Forms type() {
+    Forms type() override {
         return Chat;
     }
-private:
     Ui::ChatForm *ui;
+    bool contactListContains(Contact *contact);
+    void addNewContact(Contact *contact);
+private slots:
+    void on_btnSend_clicked();
+
+private:
+
     //Ui::ChatForm *getUI();
 
 };

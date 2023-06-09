@@ -97,3 +97,9 @@ QString ServerInterface::CheckResponse(QJsonObject responseObject) {
     }
     return result;
 }
+
+QUrlQuery ServerInterface::tokenBasedQuery() {
+    QUrlQuery query;
+    query.addQueryItem("token", this->token);
+    return query;
+}
