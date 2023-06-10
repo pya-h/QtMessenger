@@ -18,5 +18,5 @@ QString Contact::getRecentMessageSigned() {
 }
 
 QString Contact::toString() {
-    return strType() + ": " + getName();
+    return getName();
 }

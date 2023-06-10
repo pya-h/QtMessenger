@@ -18,33 +18,36 @@ void ChatForm::on_btnSend_clicked()
     // for now:
     if(!ui->txtCurrentContact->text().isEmpty() && !ui->txtNewMessage->text().isEmpty()) {
         Client *client = (Client *) objClient;
-        class User newTarget(ui->txtCurrentContact->text());
-        client->setTarget(&newTarget);
+        class User *newTarget = new class User(ui->txtCurrentContact->text());
+        client->setTarget(newTarget);
         client->sendMessage(ui->txtNewMessage->text());
     }
 }
 
-bool ChatForm::contactListContains(Contact *contact) {
-
-    QAbstractItemModel* model = ui->lstContacts->model();
-    QString expression = contact->toString();
-    int rowCount = model->rowCount();
-    int columnCount = model->columnCount();
-
-    for(int i = 0; i < rowCount; i++)
-        for(int j = 0; j < columnCount; j++)
-            if(model->index(i, j).data(Qt::DisplayRole).toString().contains(expression))
-                return true;
-
-    return false;
-
-}
-
 void ChatForm::addNewContact(Contact *contact) {
-    if(!contactListContains(contact)) {
-        /*QAbstractItemModel *model = ui->lstContacts->model();
-        QModelIndex index = model->index(model->rowCount()-1, 0);
-        model->setData(index, contact->toString());
-        ui->lstContacts->setModel(model);*/
-    }
+
+   QListWidgetItem *item = new QListWidgetItem(contact->getName());
+   ui->lstContacts->addItem(item);
 }
+
+void ChatForm::on_lstContacts_itemSelectionChanged()
+{
+ //  qDebug() << ui->lstContacts->SelectedClicked();
+   QList<QListWidgetItem*> selections(ui->lstContacts->selectedItems());
+   qDebug() << selections;
+   if(selections.size() > 0) {
+       auto item = selections.at(0);
+       int index = 0;
+       for(index = 0; index < ui->lstContacts->count() && ui->lstContacts->item(index) != item; index++);
+
+       qDebug() << index;
+
+       if(index < ui->lstContacts->count()) {
+           Client *client = (Client *) objClient;
+           client->setTarget(index);
+           client->loadChat();
+       }
+
+   }
+}
+

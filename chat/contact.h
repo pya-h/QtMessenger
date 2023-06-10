@@ -15,12 +15,13 @@ class Contact : public QObject
     Q_OBJECT
 public:
     explicit Contact(QString name, QObject *parent = nullptr);
-    QString getName() {
+    QString getName() const {
         return name;
     }
 protected:
     QString name, recentMessage;
 public:
+
     virtual ContactTypes type() {
         return None;
     }
@@ -32,6 +33,11 @@ public:
     QString getRecentMessage();
     QString getRecentMessageSigned();
     QString toString();
+
+    bool operator== (const Contact &other) const {
+        return this->name == other.getName();
+    }
+
 signals:
 
 };

@@ -32,7 +32,7 @@ QNetworkRequest ServerInterface::PrepareRequest(QString path, QUrlQuery query) {
     url.setScheme(ServerInterface::SCHEME);
     url.setHost(ServerInterface::HOST);
     url.setPort(ServerInterface::PORT);
-    url.setPath(path);
+    url.setPath("/" + path);
 
     // set query
     url.setQuery(query);

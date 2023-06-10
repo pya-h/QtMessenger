@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ChatForm</class>
  <widget class="QWidget" name="ChatForm">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,22 +13,21 @@
     <height>675</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <widget class="QListView" name="lstContacts">
-   <property name="geometry">
-    <rect>
-     <x>840</x>
-     <y>10</y>
-     <width>341</width>
-     <height>661</height>
-    </rect>
-   </property>
-  </widget>
+  <property name="windowTitle">
+   <string>ChatRoom</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QPlainTextEdit" name="txtChatList">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -34,6 +36,20 @@
      <width>821</width>
      <height>571</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <pointsize>13</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+   <property name="placeholderText">
+    <string>Start chatting...</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="txtNewMessage">
@@ -44,6 +60,13 @@
      <width>761</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="placeholderText">
     <string>Type your message here...</string>
@@ -71,11 +94,37 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
    </property>
    <property name="placeholderText">
     <string>You can type the username that you want to chat with here...</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="lstContacts">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>10</y>
+     <width>341</width>
+     <height>651</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
   </widget>
  </widget>

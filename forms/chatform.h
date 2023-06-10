@@ -4,6 +4,8 @@
 #include "form.h"
 #include "ui_chatform.h"
 #include "../chat/contact.h"
+#include <QListWidget>
+#include <QListWidgetItem>
 
 namespace Ui {
 class ChatForm;
@@ -23,8 +25,11 @@ public:
     Ui::ChatForm *ui;
     bool contactListContains(Contact *contact);
     void addNewContact(Contact *contact);
+
 private slots:
     void on_btnSend_clicked();
+
+    void on_lstContacts_itemSelectionChanged();
 
 private:
 
