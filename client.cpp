@@ -11,6 +11,10 @@ void Client::start() {
     currentForm->show();
 }
 
+QString Client::getChatWithContact(Contact *contact) {
+    return me->getChat(contact != nullptr ? contact : target);
+}
+
 void Client::login(QString username, QString password) {
     // set query
     this->username = username;
@@ -142,8 +146,8 @@ void Client::setTarget(unsigned int contactIndex) {
         ChatForm *chatForm = (ChatForm *) currentForm;
         chatForm->ui->txtCurrentContact->setText(this->target->getName());
     }
-
 }
+
 void Client::sendMessage(QString message) {
     // set query
     QUrlQuery query = tokenBasedQuery();
@@ -181,6 +185,11 @@ void Client::sendMessageCallback(QNetworkReply *response) {
     }
 }
 
+void Client::bindLoaderOnContact(Contact *contact) {
+    LoaderThread *loader = new LoaderThread(contact);
+    connect(loader, &LoaderThread::timeToLoad, this, &Client::loadChat);
+    loader->start();
+}
 void Client::loadContacts() {
     QUrlQuery query = tokenBasedQuery();
     QNetworkRequest request = PrepareRequest("getuserlist", query);
@@ -202,16 +211,16 @@ void Client::loadContactsCallback(QNetworkReply *response) {
              qDebug() << value.toObject();
              for(int i = 1; !value.isNull() && value.isObject(); i++) {
 
-                 QString name = value.toObject().value("src").toString();
-                 if(name.isEmpty())
-                     break;
-                 Contact *c = new class User(name);
-                 me->addNewContact(c);
-                 chatForm->addNewContact(c);
-
-                 //next step:
-                 QString blockId = "block " + QString::number(i);
-                 value = jsonObject.value(blockId);
+                QString name = value.toObject().value("src").toString();
+                if(name.isEmpty())
+                 break;
+                Contact *c = new class User(name);
+                me->addNewContact(c);
+                chatForm->addNewContact(c);
+                bindLoaderOnContact(c);
+                //next step:
+                QString blockId = "block " + QString::number(i);
+                value = jsonObject.value(blockId);
              }
 
          }
@@ -265,7 +274,7 @@ void Client::loadChatCallback(QNetworkReply *response) {
                 }
                 me->setChat(contact, chat);
                 if(contact == target)
-                    chatForm->ui->txtChatList->setPlainText(me->getChat(contact));
+                    chatForm->updateChatList(me->getChat(contact));
                 // & save into file
                 // else => just save in file
             }

@@ -6,6 +6,7 @@ ChatForm::ChatForm(QObject *client, Form *parent) :
     ui(new Ui::ChatForm)
 {
     ui->setupUi(this);
+
 }
 
 ChatForm::~ChatForm()
@@ -18,9 +19,14 @@ void ChatForm::on_btnSend_clicked()
     // for now:
     if(!ui->txtCurrentContact->text().isEmpty() && !ui->txtNewMessage->text().isEmpty()) {
         Client *client = (Client *) objClient;
-        class User *newTarget = new class User(ui->txtCurrentContact->text());
+        Contact *newTarget = client->getContactByName(ui->txtCurrentContact->text());
+        if(newTarget == nullptr) {
+            newTarget = new class User(ui->txtCurrentContact->text());
+            client->bindLoaderOnContact(newTarget);
+        }
         client->setTarget(newTarget);
         client->sendMessage(ui->txtNewMessage->text());
+        ui->txtNewMessage->setText("");
     }
 }
 
@@ -30,6 +36,7 @@ void ChatForm::addNewContact(Contact *contact) {
    ui->lstContacts->addItem(item);
 }
 
+
 void ChatForm::on_lstContacts_itemSelectionChanged()
 {
  //  qDebug() << ui->lstContacts->SelectedClicked();
@@ -37,17 +44,26 @@ void ChatForm::on_lstContacts_itemSelectionChanged()
    qDebug() << selections;
    if(selections.size() > 0) {
        auto item = selections.at(0);
-       int index = 0;
-       for(index = 0; index < ui->lstContacts->count() && ui->lstContacts->item(index) != item; index++);
 
-       qDebug() << index;
+       Client *client = (Client *) objClient;
+       Contact *contact = client->getContactByName(item->text());
 
-       if(index < ui->lstContacts->count()) {
-           Client *client = (Client *) objClient;
-           client->setTarget(index);
-           client->loadChat();
+       if(contact != nullptr) {
+            ui->txtCurrentContact->setText(contact->getName());
+            client->setTarget(contact);
+            updateChatList(client->getChatWithContact());
        }
 
    }
+}
+
+void ChatForm::scrollChatToRecentMessage() {
+    QScrollBar *v = ui->txtChatList->verticalScrollBar();
+    v->setValue(v->maximum());
+}
+
+void ChatForm::updateChatList(QString chat) {
+    ui->txtChatList->setPlainText(chat);
+    scrollChatToRecentMessage();
 }
 

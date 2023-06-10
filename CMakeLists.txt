@@ -29,6 +29,8 @@ set(PROJECT_SOURCES
         client.cpp
         serverinterface.cpp
         serverinterface.h
+        loaderthread.cpp
+        loaderthread.h
 
         chat/contact.h
         chat/contact.cpp

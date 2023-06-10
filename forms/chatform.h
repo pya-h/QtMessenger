@@ -6,6 +6,7 @@
 #include "../chat/contact.h"
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QScrollBar>
 
 namespace Ui {
 class ChatForm;
@@ -25,6 +26,8 @@ public:
     Ui::ChatForm *ui;
     bool contactListContains(Contact *contact);
     void addNewContact(Contact *contact);
+    void scrollChatToRecentMessage();
+    void updateChatList(QString chat);
 
 private slots:
     void on_btnSend_clicked();
