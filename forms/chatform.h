@@ -34,6 +34,10 @@ private slots:
 
     void on_lstContacts_itemSelectionChanged();
 
+    void on_actionExit_triggered();
+
+    void on_actionLogout_triggered();
+
 private:
 
     //Ui::ChatForm *getUI();

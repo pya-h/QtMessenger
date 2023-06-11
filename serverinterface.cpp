@@ -1,9 +1,8 @@
 #include "serverinterface.h"
 
 
-QString ServerInterface::SCHEME = "http";
-int ServerInterface::PORT = 8080;
-QString ServerInterface::HOST = "api.barafardayebehtar.ml";
+const QString ServerInterface::SCHEME = "http", ServerInterface::HOST = "api.barafardayebehtar.ml";
+const int ServerInterface::PORT = 8080;
 
 ServerInterface::ServerInterface(QObject *parent) : QObject(parent)
 {

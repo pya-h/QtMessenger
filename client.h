@@ -6,6 +6,7 @@
 #include "forms/chatform.h"
 #include "chat/user.h"
 #include "loaderthread.h"
+#include <QFile>
 
 
 class Client : public ServerInterface
@@ -16,7 +17,9 @@ private:
     Form *currentForm = nullptr;
     class User *me = nullptr;
     Contact *target = nullptr;
-    std::thread *thread;
+
+    const static QString CRED_FILE, DATA_FOLDER;
+
 public:
     explicit Client(ServerInterface *parent = nullptr);
 
@@ -53,7 +56,10 @@ public slots:
         return me->getContact(name);
     }
 
-    void bindLoaderOnContact(Contact *contact);
+    void bindChatLoaderOnContact(Contact *contact);
+    void scheduleContactListLoad();
+    void saveCredentials();
+    bool loadCredentials();
 };
 
 #endif // CLIENT_H

@@ -15,9 +15,8 @@ class ServerInterface : public QObject
 public:
     explicit ServerInterface(QObject *parent = nullptr);
 protected:
-    static QString SCHEME;
-    static int PORT;
-    static QString HOST;
+    const static QString SCHEME,HOST;
+    const static int PORT;
 
     QString username, password;
     QString token;

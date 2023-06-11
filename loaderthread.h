@@ -10,7 +10,7 @@ class LoaderThread : public QThread
 {
 Q_OBJECT
 public:
-    explicit LoaderThread(Contact* contact, bool stop = false, QObject *parent = nullptr);
+    explicit LoaderThread(Contact* contact = nullptr, bool stop = false, QObject *parent = nullptr);
     void run();
 
     // if Stop = true, the thread will break
@@ -20,6 +20,7 @@ public:
 signals:
     // To communicate with Gui Thread
     // we need to emit a signal
+    void timeToLoadNoParam();
     void timeToLoad(Contact *contact);
 
 public slots:

@@ -4,15 +4,71 @@ Client::Client(ServerInterface *parent)
     : ServerInterface{parent}
 {
 
+    if(!QDir(DATA_FOLDER).exists()) {
+        QDir().mkdir(DATA_FOLDER);
+    }
 }
 
+const QString Client::CRED_FILE = "me.cred", Client::DATA_FOLDER = "data";
+
 void Client::start() {
-    currentForm = new AuthenticationForm(this);
+    if(loadCredentials()) {
+        currentForm = new ChatForm(this);
+        scheduleContactListLoad();
+    }
+    else {
+        currentForm = new AuthenticationForm(this);
+
+    }
     currentForm->show();
+
+}
+
+bool Client::loadCredentials() {
+    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
+
+    if(!credFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Cannot read credentials... need to login again!";
+        return false;
+    }
+
+    if(!credFile.atEnd()) {
+        username = QString(credFile.readLine()).replace("\n", "");
+        qDebug() << username;
+        if(!credFile.atEnd()) {
+            password = QString(credFile.readLine()).replace("\n", "");
+            qDebug() << password;
+
+            if(!credFile.atEnd()) {
+                token = QString(credFile.readLine()).replace("\n", "");
+                qDebug() << token;
+                this->setToken(token);
+                this->me = new class User(this->username, this->password);
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 QString Client::getChatWithContact(Contact *contact) {
     return me->getChat(contact != nullptr ? contact : target);
+}
+
+void Client::saveCredentials(){
+    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
+    if(!credFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        if(currentForm != nullptr) {
+            currentForm->popup("Credntial Save Error", "Application cannot save your login credentials; this may cuase bugs in the performance!");
+        }
+        qDebug() << "Credential Save Error!";
+        return;
+    }
+    QTextStream output(&credFile);
+
+    output << username << "\n" << password << "\n" << token;
+
+    credFile.close();
 }
 
 void Client::login(QString username, QString password) {
@@ -51,11 +107,12 @@ void Client::loginCallback(QNetworkReply *response) {
                 this->me = new class User(this->username, this->password);
                 if(!this->token.isEmpty()) {
                     authForm->popup("Login Successfull", "You\'ve logged in successfully...Now you can start chatting :)!");
-
+                    saveCredentials();
                     currentForm = new ChatForm(this);
                     authForm->close();
                     currentForm->show();
-                    loadContacts();
+                    scheduleContactListLoad();
+
                 } else {
                     authForm->ui->lblResult->setText("Logged in Already: It seems that you\'ve already logged in... Please first press logout and then Log in again!");
                 }
@@ -95,9 +152,22 @@ void Client::logoutCallback(QNetworkReply *response) {
 
         this->username = "";
         this->password = "";
-        if(currentForm != nullptr && currentForm->type() == Authentication) {
-             AuthenticationForm *authForm = (AuthenticationForm *) currentForm;
-             authForm->ui->lblResult->setText(resultText);
+        if(currentForm != nullptr) {
+             if(currentForm->type() == Forms::Authentication) {
+                 AuthenticationForm *authForm = (AuthenticationForm *) currentForm;
+                 authForm->ui->lblResult->setText(resultText);
+             } else if(currentForm->type() == Forms::Chat) {
+                QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
+                if(credFile.exists()) {
+                    credFile.remove();
+                }
+                // THEN DELETE OFFLINE DATA
+                if(currentForm != nullptr) {
+                    currentForm->close();
+                    exit(0);
+                }
+
+             }
          }
     }
 
@@ -185,7 +255,13 @@ void Client::sendMessageCallback(QNetworkReply *response) {
     }
 }
 
-void Client::bindLoaderOnContact(Contact *contact) {
+void Client::scheduleContactListLoad() {
+    LoaderThread *contactLoadThread = new LoaderThread();
+    connect(contactLoadThread, &LoaderThread::timeToLoadNoParam, this, &Client::loadContacts);
+    contactLoadThread->start();
+}
+
+void Client::bindChatLoaderOnContact(Contact *contact) {
     LoaderThread *loader = new LoaderThread(contact);
     connect(loader, &LoaderThread::timeToLoad, this, &Client::loadChat);
     loader->start();
@@ -213,11 +289,13 @@ void Client::loadContactsCallback(QNetworkReply *response) {
 
                 QString name = value.toObject().value("src").toString();
                 if(name.isEmpty())
-                 break;
-                Contact *c = new class User(name);
-                me->addNewContact(c);
-                chatForm->addNewContact(c);
-                bindLoaderOnContact(c);
+                    break;
+                if(me->getContact(name) == nullptr) {
+                    Contact *c = new class User(name);
+                    me->addNewContact(c);
+                    chatForm->addNewContact(c);
+                    bindChatLoaderOnContact(c);
+                }
                 //next step:
                 QString blockId = "block " + QString::number(i);
                 value = jsonObject.value(blockId);
@@ -226,6 +304,7 @@ void Client::loadContactsCallback(QNetworkReply *response) {
          }
     } else {
         qDebug() << resultText;
+        currentForm->popup("Error", resultText, MessageTypes::Error);
     }
 
 }
@@ -281,6 +360,7 @@ void Client::loadChatCallback(QNetworkReply *response) {
          }
     } else {
         qDebug() << resultText;
+        currentForm->popup("Error", resultText, MessageTypes::Error);
     }
 
 }

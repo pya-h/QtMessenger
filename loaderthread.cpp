@@ -12,7 +12,7 @@ void LoaderThread ::run()
     //to prevent consuming memory every time, I defined the variables at once
     while(1)
     {
-        emit timeToLoad(contact);
+        emit contact != nullptr ? timeToLoad(contact) : timeToLoadNoParam();
         this->msleep(5000);
     }
 }

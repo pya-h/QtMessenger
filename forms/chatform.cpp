@@ -22,7 +22,7 @@ void ChatForm::on_btnSend_clicked()
         Contact *newTarget = client->getContactByName(ui->txtCurrentContact->text());
         if(newTarget == nullptr) {
             newTarget = new class User(ui->txtCurrentContact->text());
-            client->bindLoaderOnContact(newTarget);
+            client->bindChatLoaderOnContact(newTarget);
         }
         client->setTarget(newTarget);
         client->sendMessage(ui->txtNewMessage->text());
@@ -67,3 +67,17 @@ void ChatForm::updateChatList(QString chat) {
     scrollChatToRecentMessage();
 }
 
+
+void ChatForm::on_actionExit_triggered()
+{
+    this->close();
+    exit(0);
+}
+
+void ChatForm::on_actionLogout_triggered()
+{
+    if(popup("Sure?", "Are you sure you want to logout?", MessageTypes::Question)) {
+        Client *client = (Client *) objClient;
+        client->logout();
+    }
+}

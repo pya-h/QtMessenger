@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1190</width>
-    <height>675</height>
+    <height>703</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,108 +25,156 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <widget class="QPlainTextEdit" name="txtChatList">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
+  <widget class="QWidget" name="containerWidget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>50</y>
-     <width>821</width>
-     <height>571</height>
+     <y>30</y>
+     <width>1181</width>
+     <height>671</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Times New Roman</family>
-     <pointsize>13</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-   <property name="placeholderText">
-    <string>Start chatting...</string>
-   </property>
+   <widget class="QPushButton" name="btnSend">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>620</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Send</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="txtNewMessage">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>620</y>
+      <width>761</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="placeholderText">
+     <string>Type your message here...</string>
+    </property>
+   </widget>
+   <widget class="QMenuBar" name="menubar">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>746</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="lstContacts">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>0</y>
+      <width>341</width>
+      <height>651</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="txtChatList">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>821</width>
+      <height>571</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>13</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Start chatting...</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="txtCurrentContact">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>821</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="placeholderText">
+     <string>You can type the username that you want to chat with here...</string>
+    </property>
+   </widget>
   </widget>
-  <widget class="QLineEdit" name="txtNewMessage">
+  <widget class="QMenuBar" name="menuChatTools">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>630</y>
-     <width>761</width>
-     <height>31</height>
+     <x>5</x>
+     <y>2</y>
+     <width>1191</width>
+     <height>21</height>
     </rect>
    </property>
-   <property name="font">
-    <font>
-     <family>Times New Roman</family>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="placeholderText">
-    <string>Type your message here...</string>
-   </property>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionLogout"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuTools"/>
   </widget>
-  <widget class="QPushButton" name="btnSend">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>630</y>
-     <width>51</width>
-     <height>31</height>
-    </rect>
-   </property>
+  <action name="actionLogout">
    <property name="text">
-    <string>Send</string>
+    <string>Logout</string>
    </property>
-  </widget>
-  <widget class="QLineEdit" name="txtCurrentContact">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>821</width>
-     <height>31</height>
-    </rect>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
-   <property name="font">
-    <font>
-     <family>Times New Roman</family>
-     <pointsize>12</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-   <property name="placeholderText">
-    <string>You can type the username that you want to chat with here...</string>
-   </property>
-  </widget>
-  <widget class="QListWidget" name="lstContacts">
-   <property name="geometry">
-    <rect>
-     <x>840</x>
-     <y>10</y>
-     <width>341</width>
-     <height>651</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Times New Roman</family>
-     <pointsize>12</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-  </widget>
+  </action>
  </widget>
  <resources/>
  <connections/>
