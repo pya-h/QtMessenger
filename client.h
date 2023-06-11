@@ -19,10 +19,9 @@ private:
     Contact *target = nullptr;
 
     const static QString CRED_FILE, DATA_FOLDER;
-
 public:
     explicit Client(ServerInterface *parent = nullptr);
-
+    ~Client();
     void start();
 signals:
 public slots:

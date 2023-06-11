@@ -17,8 +17,14 @@ AuthenticationForm::~AuthenticationForm()
 void AuthenticationForm::on_btnSignup_clicked()
 {
     Client *client = (Client *) objClient;
-    if(!ui->txtSignupUsername->text().isEmpty() && !ui->txtSignupPassword->text().isEmpty())
+    if(!ui->txtSignupUsername->text().isEmpty() && !ui->txtSignupPassword->text().isEmpty()) {
         client->signup(ui->txtSignupUsername->text(), ui->txtSignupPassword->text(), ui->txtSignupFirstname->text(), ui->txtSignupLastname->text());
+        ui->txtSignupUsername->setText("");
+        ui->txtSignupPassword->setText("");
+        ui->txtSignupFirstname->setText("");
+        ui->txtSignupLastname->setText("");
+
+    }
     else
         popup("Incompleted Credentials", "Please fill in the required fields.", MessageTypes::Warning);
 

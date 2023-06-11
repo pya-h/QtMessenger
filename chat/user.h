@@ -4,18 +4,21 @@
 #include <QObject>
 #include "contact.h"
 #include <QMap>
+#include <QFile>
+#include <QtCore/QtCore>
 
 class User : public Contact
 {
     Q_OBJECT
 private:
     QString password;
+    QString parentFolder;
     //QList<Contact *> contacts;
     QMap<Contact *, QString> chats;
 
    // QList<QString> chats;
 public:
-    explicit User(QString name, QString password = "", QObject *parent = nullptr);
+    explicit User(QString name, QString password = "", QString parentFolder = "", QObject *parent = nullptr);
 
     QString getChat(Contact *contact) {
         return chats.value(contact, "");
@@ -48,7 +51,9 @@ public:
         return "user";
     }
 
-
+    // these methods will be used only by the logged in account:
+    void saveChatWith(Contact *contact);
+    void saveAllChats();
 };
 
 #endif // USER_H

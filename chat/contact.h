@@ -38,6 +38,11 @@ public:
         return this->name == other.getName();
     }
 
+    QString getFileName();
+
+    const static QString USERS_FOLDER, GROUPS_FOLDER, CHANNELS_FOLDER;
+
+
 signals:
 
 };

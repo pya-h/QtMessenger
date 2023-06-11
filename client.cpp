@@ -4,12 +4,23 @@ Client::Client(ServerInterface *parent)
     : ServerInterface{parent}
 {
 
-    if(!QDir(DATA_FOLDER).exists()) {
-        QDir().mkdir(DATA_FOLDER);
+    // prepare offline folders
+    const QString folders[] = {DATA_FOLDER, DATA_FOLDER + "/" + Contact::USERS_FOLDER, DATA_FOLDER + "/" + Contact::GROUPS_FOLDER, DATA_FOLDER + "/" + Contact::CHANNELS_FOLDER};
+
+    for(int i = 0; i < folders->length(); i++) {
+        if(!QDir(folders[i]).exists())
+            QDir().mkdir(folders[i]);
+
     }
+
 }
 
 const QString Client::CRED_FILE = "me.cred", Client::DATA_FOLDER = "data";
+
+Client::~Client() {
+    if(me != nullptr)
+        me->saveAllChats();
+}
 
 void Client::start() {
     if(loadCredentials()) {
@@ -24,51 +35,8 @@ void Client::start() {
 
 }
 
-bool Client::loadCredentials() {
-    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
-
-    if(!credFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Cannot read credentials... need to login again!";
-        return false;
-    }
-
-    if(!credFile.atEnd()) {
-        username = QString(credFile.readLine()).replace("\n", "");
-        qDebug() << username;
-        if(!credFile.atEnd()) {
-            password = QString(credFile.readLine()).replace("\n", "");
-            qDebug() << password;
-
-            if(!credFile.atEnd()) {
-                token = QString(credFile.readLine()).replace("\n", "");
-                qDebug() << token;
-                this->setToken(token);
-                this->me = new class User(this->username, this->password);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 QString Client::getChatWithContact(Contact *contact) {
     return me->getChat(contact != nullptr ? contact : target);
-}
-
-void Client::saveCredentials(){
-    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
-    if(!credFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        if(currentForm != nullptr) {
-            currentForm->popup("Credntial Save Error", "Application cannot save your login credentials; this may cuase bugs in the performance!");
-        }
-        qDebug() << "Credential Save Error!";
-        return;
-    }
-    QTextStream output(&credFile);
-
-    output << username << "\n" << password << "\n" << token;
-
-    credFile.close();
 }
 
 void Client::login(QString username, QString password) {
@@ -104,7 +72,7 @@ void Client::loginCallback(QNetworkReply *response) {
 
             if(!newToken.isNull()) {
                 this->setToken(newToken.toString());
-                this->me = new class User(this->username, this->password);
+                this->me = new class User(this->username, this->password, DATA_FOLDER);
                 if(!this->token.isEmpty()) {
                     authForm->popup("Login Successfull", "You\'ve logged in successfully...Now you can start chatting :)!");
                     saveCredentials();
@@ -157,11 +125,11 @@ void Client::logoutCallback(QNetworkReply *response) {
                  AuthenticationForm *authForm = (AuthenticationForm *) currentForm;
                  authForm->ui->lblResult->setText(resultText);
              } else if(currentForm->type() == Forms::Chat) {
-                QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
-                if(credFile.exists()) {
-                    credFile.remove();
-                }
-                // THEN DELETE OFFLINE DATA
+                 // THEN DELETE OFFLINE DATA
+                QDir dataFolder(DATA_FOLDER);
+                if(dataFolder.exists())
+                    dataFolder.removeRecursively();
+
                 if(currentForm != nullptr) {
                     currentForm->close();
                     exit(0);
@@ -352,6 +320,7 @@ void Client::loadChatCallback(QNetworkReply *response) {
                     value = jsonObject.value(blockId);
                 }
                 me->setChat(contact, chat);
+                me->saveChatWith(contact);
                 if(contact == target)
                     chatForm->updateChatList(me->getChat(contact));
                 // & save into file
@@ -363,4 +332,49 @@ void Client::loadChatCallback(QNetworkReply *response) {
         currentForm->popup("Error", resultText, MessageTypes::Error);
     }
 
+}
+
+// ------------ OFFLINE SECTION --------
+
+bool Client::loadCredentials() {
+    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
+
+    if(!credFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Cannot read credentials... need to login again!";
+        return false;
+    }
+
+    if(!credFile.atEnd()) {
+        username = QString(credFile.readLine()).replace("\n", "");
+        qDebug() << username;
+        if(!credFile.atEnd()) {
+            password = QString(credFile.readLine()).replace("\n", "");
+            qDebug() << password;
+
+            if(!credFile.atEnd()) {
+                token = QString(credFile.readLine()).replace("\n", "");
+                qDebug() << token;
+                this->setToken(token);
+                this->me = new class User(this->username, this->password, DATA_FOLDER);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Client::saveCredentials(){
+    QFile credFile(DATA_FOLDER + "/" + CRED_FILE);
+    if(!credFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        if(currentForm != nullptr) {
+            currentForm->popup("Credntial Save Error", "Application cannot save your login credentials; this may cuase bugs in the performance!");
+        }
+        qDebug() << "Credential Save Error!";
+        return;
+    }
+    QTextStream output(&credFile);
+
+    output << username << "\n" << password << "\n" << token;
+
+    credFile.close();
 }
