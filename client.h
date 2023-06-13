@@ -23,6 +23,10 @@ public:
     explicit Client(ServerInterface *parent = nullptr);
     ~Client();
     void start();
+    void saveCredentials();
+    bool loadCredentials();
+
+    void loadOfflineData();
 signals:
 public slots:
 
@@ -57,8 +61,7 @@ public slots:
 
     void bindChatLoaderOnContact(Contact *contact);
     void scheduleContactListLoad();
-    void saveCredentials();
-    bool loadCredentials();
+
 };
 
 #endif // CLIENT_H

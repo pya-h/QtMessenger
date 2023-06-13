@@ -25,13 +25,16 @@ Client::~Client() {
 void Client::start() {
     if(loadCredentials()) {
         currentForm = new ChatForm(this);
+        currentForm->show();
+
+        loadOfflineData();
         scheduleContactListLoad();
     }
     else {
         currentForm = new AuthenticationForm(this);
+        currentForm->show();
 
     }
-    currentForm->show();
 
 }
 
@@ -227,6 +230,7 @@ void Client::scheduleContactListLoad() {
     LoaderThread *contactLoadThread = new LoaderThread();
     connect(contactLoadThread, &LoaderThread::timeToLoadNoParam, this, &Client::loadContacts);
     contactLoadThread->start();
+
 }
 
 void Client::bindChatLoaderOnContact(Contact *contact) {
@@ -262,7 +266,7 @@ void Client::loadContactsCallback(QNetworkReply *response) {
                     Contact *c = new class User(name);
                     me->addNewContact(c);
                     chatForm->addNewContact(c);
-                    bindChatLoaderOnContact(c);
+
                 }
                 //next step:
                 QString blockId = "block " + QString::number(i);
@@ -377,4 +381,26 @@ void Client::saveCredentials(){
     output << username << "\n" << password << "\n" << token;
 
     credFile.close();
+}
+
+void Client::loadOfflineData() {
+    if(currentForm != nullptr && currentForm->type() == Forms::Chat) {
+        ChatForm *chatForm = (ChatForm *) currentForm;
+        const QString dirs[] = {Contact::USERS_FOLDER, Contact::GROUPS_FOLDER, Contact::CHANNELS_FOLDER};
+        for(QString dirname: dirs) {
+            QDir dir(DATA_FOLDER + "/" + dirname);
+            for(const QFileInfo &file: dir.entryInfoList(QDir::Files)) {
+                QFile chatFileReader(file.filePath());
+                const QString chat = chatFileReader.readAll();
+                Contact *c;
+                if(dirname == Contact::USERS_FOLDER)
+                    c = new class User(file.fileName());
+
+                me->setChat(c, chat);
+                chatForm->addNewContact(c);
+                bindChatLoaderOnContact(c);
+                chatFileReader.close();
+            }
+        }
+    }
 }
