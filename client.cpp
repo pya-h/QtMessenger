@@ -35,7 +35,6 @@ void Client::start() {
         currentForm->show();
 
     }
-
 }
 
 QString Client::getChatWithContact(Contact *contact) {
@@ -211,12 +210,18 @@ void Client::sendMessageCallback(QNetworkReply *response) {
         int code = jsonObject.value("code").toString().toInt();
         if(code == 200) {
             ChatForm *chatForm = (ChatForm *) currentForm;
-            QString chatList = chatForm->ui->txtChatList->toPlainText();
-            chatForm->ui->txtChatList->setPlainText(chatList + "\n\n" + me->getRecentMessageSigned());
+
             if(me->contactIsNew(target)) {
                 me->addNewContact(target);
                 chatForm->addNewContact(target);
             }
+            else {
+                me->updateChat(target, me->getRecentMessageSigned());
+                me->saveChatWith(target);
+            }
+            chatForm->ui->txtChatList->setPlainText(me->getChat(target));
+            chatForm->scrollChatToRecentMessage();
+
         } else {
             currentForm->popup("Message Send Failure", resultText, MessageTypes::Error);
         }
@@ -248,45 +253,53 @@ void Client::loadContacts() {
 
 void Client::loadContactsCallback(QNetworkReply *response) {
     QJsonObject jsonObject = Client::GetJsonObject(response);
-    QString resultText = Client::CheckResponse(jsonObject);
+    const QString resultText = Client::CheckResponse(jsonObject),
+        strCode = jsonObject.value("code").toString();
 
-    int code = jsonObject.value("code").toString().toInt();
+    if(!strCode.isEmpty()) {
+        const int code = strCode.toInt();
+        if(code == 200) {
+            if(currentForm != nullptr && currentForm->type() == Forms::Chat) {
+                 ChatForm *chatForm = (ChatForm *) currentForm;
+                 QJsonValue value = jsonObject.value("block 0");
+                 qDebug() << value.toObject();
+                 for(int i = 1; !value.isNull() && value.isObject(); i++) {
 
-    if(code == 200) {
-        if(currentForm != nullptr && currentForm->type() == Forms::Chat) {
-             ChatForm *chatForm = (ChatForm *) currentForm;
-             QJsonValue value = jsonObject.value("block 0");
-             qDebug() << value.toObject();
-             for(int i = 1; !value.isNull() && value.isObject(); i++) {
+                    QString name = value.toObject().value("src").toString();
+                    if(name.isEmpty())
+                        break;
+                    if(me->getContact(name) == nullptr) {
+                        Contact *c = new class User(name);
+                        me->addNewContact(c);
+                        chatForm->addNewContact(c);
+                        bindChatLoaderOnContact(c);
+                    }
+                    //next step:
+                    QString blockId = "block " + QString::number(i);
+                    value = jsonObject.value(blockId);
+                 }
 
-                QString name = value.toObject().value("src").toString();
-                if(name.isEmpty())
-                    break;
-                if(me->getContact(name) == nullptr) {
-                    Contact *c = new class User(name);
-                    me->addNewContact(c);
-                    chatForm->addNewContact(c);
-
-                }
-                //next step:
-                QString blockId = "block " + QString::number(i);
-                value = jsonObject.value(blockId);
              }
+        } else {
 
-         }
-    } else {
-        qDebug() << resultText;
-        currentForm->popup("Error", resultText, MessageTypes::Error);
+            currentForm->popup("Error", resultText, MessageTypes::Error);
+        }
     }
-
+    else {
+        // probably connections is lost
+        qDebug() << resultText;
+    }
 }
 
 void Client::loadChat(Contact *contact) {
+
     if(contact == nullptr)
         contact = target;
     if(contact != nullptr) {
         QUrlQuery query = tokenBasedQuery();
         query.addQueryItem("dst", contact->getName());
+        if(!contact->getLastModifiedDate().isEmpty())
+            query.addQueryItem("date", contact->getLastModifiedDate());
         QNetworkRequest request = PrepareRequest("get" + contact->strType() + "chats", query);
         QNetworkAccessManager *rest = new QNetworkAccessManager(this);
         connect(rest, &QNetworkAccessManager::finished, this, &Client::loadChatCallback);
@@ -296,46 +309,51 @@ void Client::loadChat(Contact *contact) {
 
 void Client::loadChatCallback(QNetworkReply *response) {
     QJsonObject jsonObject = Client::GetJsonObject(response);
-    QString resultText = Client::CheckResponse(jsonObject);
+    const QString resultText = Client::CheckResponse(jsonObject),
+        strCode = jsonObject.value("code").toString();
 
-    int code = jsonObject.value("code").toString().toInt();
-    if(code == 200) {
-        Contact *contact;
-        //load "block #x" from json
-        QString chat;
-        if(currentForm != nullptr && currentForm->type() == Forms::Chat) {
-            ChatForm *chatForm = (ChatForm *) currentForm;
-            QJsonValue value = jsonObject.value("block 0");
-            if(!value.isNull() && value.isObject()) {
-                QString src = value.toObject().value("src").toString(),
-                        dst = value.toObject().value("dst").toString();
-                contact = src == me->getName() ? me->getContact(dst) : me->getContact(src);
+    if(!strCode.isEmpty()) {
+        const int code = strCode.toInt();
+        if(code == 200) {
+            Contact *contact;
+            //load "block #x" from json
+            QString chat;
+            if(currentForm != nullptr && currentForm->type() == Forms::Chat) {
+                ChatForm *chatForm = (ChatForm *) currentForm;
+                QJsonValue value = jsonObject.value("block 0");
+                if(!value.isNull() && value.isObject()) {
+                    QString src = value.toObject().value("src").toString(),
+                            dst = value.toObject().value("dst").toString();
+                    contact = src == me->getName() ? me->getContact(dst) : me->getContact(src);
 
-                for(int i = 1; !value.isNull() && value.isObject(); i++) {
-                    QJsonObject jMessage = value.toObject();
+                    for(int i = 1; !value.isNull() && value.isObject(); i++) {
+                        QJsonObject jMessage = value.toObject();
 
-                    QString name = jMessage.value("src").toString(),
-                         message = jMessage.value("body").toString();
-                    if(name.isEmpty())
-                     break;
-                    chat += name + ": " + message + "\n\n";
-                    //next step:
-                    QString blockId = "block " + QString::number(i);
-                    value = jsonObject.value(blockId);
+                        QString name = jMessage.value("src").toString(),
+                             message = jMessage.value("body").toString();
+                        if(name.isEmpty())
+                         break;
+                        chat += name + ": " + message + "\n\n";
+                        //next step:
+                        QString blockId = "block " + QString::number(i);
+                        value = jsonObject.value(blockId);
+                    }
+                    me->updateChat(contact, chat);
+                    me->saveChatWith(contact);
+                    if(contact == target)
+                        chatForm->updateChatList(me->getChat(contact));
+                    // & save into file
+                    // else => just save in file
                 }
-                me->setChat(contact, chat);
-                me->saveChatWith(contact);
-                if(contact == target)
-                    chatForm->updateChatList(me->getChat(contact));
-                // & save into file
-                // else => just save in file
-            }
-         }
-    } else {
-        qDebug() << resultText;
-        currentForm->popup("Error", resultText, MessageTypes::Error);
+             }
+        } else if(code){
+            currentForm->popup("Error", resultText, MessageTypes::Error);
+        }
     }
-
+    else {
+        // probably connections is lost
+        qDebug() << resultText;
+    }
 }
 
 // ------------ OFFLINE SECTION --------
@@ -391,15 +409,21 @@ void Client::loadOfflineData() {
             QDir dir(DATA_FOLDER + "/" + dirname);
             for(const QFileInfo &file: dir.entryInfoList(QDir::Files)) {
                 QFile chatFileReader(file.filePath());
-                const QString chat = chatFileReader.readAll();
-                Contact *c;
-                if(dirname == Contact::USERS_FOLDER)
-                    c = new class User(file.fileName());
+                if(chatFileReader.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    const QString chat = chatFileReader.readAll();
 
-                me->setChat(c, chat);
-                chatForm->addNewContact(c);
-                bindChatLoaderOnContact(c);
-                chatFileReader.close();
+                    Contact *c;
+                    if(dirname == Contact::USERS_FOLDER)
+                        c = new class User(file.fileName());
+
+                    c->updateLastModifiedDate(file.lastModified().toString("yyyyMMddHHmmss"));
+                    me->setChat(c, chat);
+                    chatForm->addNewContact(c);
+                    bindChatLoaderOnContact(c);
+                    chatFileReader.close();
+                } else {
+                    qDebug() << "Error reading offline chats with: " << file.filePath();
+                }
             }
         }
     }

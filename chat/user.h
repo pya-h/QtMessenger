@@ -54,6 +54,7 @@ public:
     // these methods will be used only by the logged in account:
     void saveChatWith(Contact *contact);
     void saveAllChats();
+
 };
 
 #endif // USER_H

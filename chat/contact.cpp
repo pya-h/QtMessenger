@@ -6,7 +6,7 @@ const QString Contact::USERS_FOLDER = "Users", Contact::GROUPS_FOLDER = "Groups"
 Contact::Contact(QString name, QObject *parent) : QObject(parent)
 {
     this->name = name;
-
+    this->lastModified = "";
 }
 
 void Contact::setRecentMessage(QString newMessage) {

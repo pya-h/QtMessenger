@@ -20,6 +20,7 @@ public:
     }
 protected:
     QString name, recentMessage;
+    QString lastModified;
 public:
 
     virtual ContactTypes type() {
@@ -42,7 +43,13 @@ public:
 
     const static QString USERS_FOLDER, GROUPS_FOLDER, CHANNELS_FOLDER;
 
+    void updateLastModifiedDate(QString date) {
+        this->lastModified = date;
+    }
 
+    QString getLastModifiedDate() {
+        return this->lastModified;
+    }
 signals:
 
 };

@@ -35,6 +35,7 @@ void User::saveChatWith(Contact *contact) {
             }
             QTextStream output(&chatFile);
             output << chat;
+            contact->updateLastModifiedDate(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
             chatFile.close();
         }
         else {
@@ -50,4 +51,5 @@ void User::saveAllChats() {
     for(auto chat = chats.cbegin(), end = chats.cend(); chat != end; chat++) {
         saveChatWith(chat.key());
     }
+    qDebug() << "Last Save called";
 }
