@@ -41,7 +41,7 @@ public:
 
     bool contactIsNew(Contact *c) {
         return !chats.contains(c);
-    };
+    }
 
     ContactTypes type() override {
         return ContactTypes::User;

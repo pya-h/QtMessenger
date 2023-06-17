@@ -2,6 +2,7 @@
 #define CONTACT_H
 
 #include <QObject>
+#include <QDate>
 
 typedef enum {
     User,
@@ -43,8 +44,8 @@ public:
 
     const static QString USERS_FOLDER, GROUPS_FOLDER, CHANNELS_FOLDER;
 
-    void updateLastModifiedDate(QString date) {
-        this->lastModified = date;
+    void updateLastModifiedDate(QDateTime date) {
+        this->lastModified = date.toString("yyyyMMddHHmmss");
     }
 
     QString getLastModifiedDate() {

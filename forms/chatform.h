@@ -7,6 +7,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QScrollBar>
+#include <QInputDialog>
 
 namespace Ui {
 class ChatForm;
@@ -37,6 +38,14 @@ private slots:
     void on_actionExit_triggered();
 
     void on_actionLogout_triggered();
+
+    void on_actionCreateGroup_triggered();
+
+    void on_actionCreateChannel_triggered();
+
+    void on_actionJoinGroup_triggered();
+
+    void on_actionJoinChannel_triggered();
 
 private:
 

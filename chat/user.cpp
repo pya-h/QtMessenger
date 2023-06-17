@@ -7,12 +7,13 @@ User::User(QString name, QString password, QString parentFolder, QObject *parent
 }
 
 void User::updateChat(Contact *contact, QString chat) {
-
+    if(chat.isEmpty())
+        return;
     if(getChat(contact).isEmpty()) {
         setChat(contact, chat);
         return;
     }
-    chats[contact] += "\n\n" + chat;
+    chats[contact] += chat;
 
 }
 
@@ -32,11 +33,14 @@ void User::saveChatWith(Contact *contact) {
             QFile chatFile(parentFolder + "/" + fileName);
             if(!chatFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 qDebug() << error;
+            } else {
+                QTextStream output(&chatFile);
+                output << chat;
+                contact->updateLastModifiedDate(QDateTime::currentDateTime());
             }
-            QTextStream output(&chatFile);
-            output << chat;
-            contact->updateLastModifiedDate(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
             chatFile.close();
+            /*QFileInfo fileInfo(fileName);
+            contact->updateLastModifiedDate(fileInfo.lastModified());*/
         }
         else {
             qDebug() << error;

@@ -36,6 +36,10 @@ set(PROJECT_SOURCES
         chat/contact.cpp
         chat/user.cpp
         chat/user.h
+        chat/group.h
+        chat/group.cpp
+        chat/channel.h
+        chat/channel.cpp
 )
 
 set(INCLUDE_DIRS windows chat)

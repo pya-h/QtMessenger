@@ -5,6 +5,8 @@
 #include "forms/authenticationform.h"
 #include "forms/chatform.h"
 #include "chat/user.h"
+#include "chat/group.h"
+#include "chat/channel.h"
 #include "loaderthread.h"
 #include <QFile>
 
@@ -50,10 +52,13 @@ public slots:
     void sendMessageCallback(QNetworkReply *response);
 
     void loadContacts();
-    void loadContactsCallback(QNetworkReply *response);
+    void loadUsersCallback(QNetworkReply *response);
+    void loadGroupsCallback(QNetworkReply *response);
+    void loadChannelsCallback(QNetworkReply *response);
 
     void loadChat(Contact *contact = nullptr);
-    void loadChatCallback(QNetworkReply *response);
+    void loadUserChatCallback(QNetworkReply *response);
+    void loadGroupOrChannelChatCallback(QNetworkReply *response);
 
     Contact *getContactByName(QString name) {
         return me->getContact(name);
@@ -61,6 +66,10 @@ public slots:
 
     void bindChatLoaderOnContact(Contact *contact);
     void scheduleContactListLoad();
+
+    void createGroupOrChannel(const QString typeName, const QString &name, const QString &title);
+    void handleCreationOrJoining(QNetworkReply *response);
+    void joinGroupOrChannel(const QString typeName, const QString &name);
 
 };
 

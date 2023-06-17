@@ -81,3 +81,52 @@ void ChatForm::on_actionLogout_triggered()
         client->logout();
     }
 }
+
+void ChatForm::on_actionCreateGroup_triggered()
+{
+    bool okPressed;
+    const QString name = QInputDialog::getText(this, "Group Name", "Enter the name of your group:", QLineEdit::Normal, "", &okPressed);
+
+    if (okPressed && !name.isEmpty()) {
+        QString title = QInputDialog::getText(this, "Group Title", "Enter the title of your group (Optional): ", QLineEdit::Normal, "", &okPressed);
+        if(!okPressed)
+            title = "";
+        Client *client = (Client *) objClient;
+        client->createGroupOrChannel("group", name, title);
+    }
+}
+
+void ChatForm::on_actionCreateChannel_triggered()
+{
+    bool okPressed;
+    const QString name = QInputDialog::getText(this, "Channel Name", "Enter the name of your channel:", QLineEdit::Normal, "", &okPressed);
+
+    if (okPressed && !name.isEmpty()) {
+        QString title = QInputDialog::getText(this, "Channel Title", "Enter the title of your channel (Optional): ", QLineEdit::Normal, "", &okPressed);
+        if(!okPressed)
+            title = "";
+        Client *client = (Client *) objClient;
+        client->createGroupOrChannel("channel", name, title);
+    }
+}
+void ChatForm::on_actionJoinGroup_triggered()
+{
+    bool okPressed;
+    const QString name = QInputDialog::getText(this, "Group Name", "Enter the name of the group you want to join:", QLineEdit::Normal, "", &okPressed);
+
+    if (okPressed && !name.isEmpty()) {
+        Client *client = (Client *) objClient;
+        client->joinGroupOrChannel("group", name);
+    }
+}
+
+void ChatForm::on_actionJoinChannel_triggered()
+{
+    bool okPressed;
+    const QString name = QInputDialog::getText(this, "Channel Name", "Enter the name of the channel you want to join:", QLineEdit::Normal, "", &okPressed);
+
+    if (okPressed && !name.isEmpty()) {
+        Client *client = (Client *) objClient;
+        client->joinGroupOrChannel("channel", name);
+    }
+}

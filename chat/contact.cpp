@@ -18,7 +18,7 @@ QString Contact::getRecentMessage() {
 }
 
 QString Contact::getRecentMessageSigned() {
-    return this->name + ": " + this->recentMessage;
+    return "\n\n" + this->name + ": " + this->recentMessage;
 }
 
 QString Contact::toString() {
